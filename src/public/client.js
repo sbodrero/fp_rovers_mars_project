@@ -34,6 +34,20 @@ const render = async (root, state) => {
 }
 
 /**
+ * Return rover's Name
+ * @param roverName
+ * @returns {function(): string}
+ */
+const createRoverHeader = (roverName) => () => `${roverName}`;
+
+/**
+ * Create tab's welcome message
+ * @param callback
+ * @returns {string}
+ */
+const createTabWelcomeTitle = (callback) => `<h3>Here are ${callback()} informations</h3><hr/>`;
+
+/**
  * Add style on first active tab
  * @param rover
  * @returns {string}
@@ -159,29 +173,6 @@ const galleryItem = (src, date) => () => `
         <p>${date}</p>
     </div>
 `
-
-/**
- * Main dynamic content
- * @param state
- * @returns {string}
- * @constructor
- */
-const App = (state) => {
-    const { rovers, all_rovers } = state.toJS();
-    return `
-        <header>
-            ${WelcomeTitle()}
-        </header>
-        <main>
-            <section>
-                <h2>Please chose a rover</h2>
-                ${renderContentOrLoader(all_rovers, rovers)}
-            </section>
-        </main>
-        <footer></footer>
-    `
-}
-
 /**
  * Create Welcome title
  * @returns {string}
@@ -204,7 +195,7 @@ const createTablinksWrapper = (callback) =>`
  * Create TabLinks
  * @param rovers
  * @returns function
-*/
+ */
 const createTabLinks = (rovers) => () => {
     return rovers.map(rover =>`
     <button 
@@ -234,18 +225,25 @@ const renderContentOrLoader = (all_rovers, rovers) => {
 }
 
 /**
- * Return rover's Name
- * @param roverName
- * @returns {function(): string}
- */
-const createRoverHeader = (roverName) => () => `${roverName}`;
-
-/**
- * Create tab's welcome message
- * @param callback
+ * Main dynamic content
+ * @param state
  * @returns {string}
+ * @constructor
  */
-const createTabWelcomeTitle = (callback) => `<h3>Here are ${callback()} informations</h3><hr/>`;
+const App = (state) => {
+    const { rovers, all_rovers } = state.toJS();
+    return `
+        <header>
+            ${WelcomeTitle()}
+        </header>
+        <main>
+            <section>
+                <h2>Please chose a rover</h2>
+                ${renderContentOrLoader(all_rovers, rovers)}
+            </section>
+        </main>
+    `
+}
 
 /**
  * Load rovers date from api
