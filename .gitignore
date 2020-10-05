@@ -49,5 +49,7 @@ Thumbs.db
 *.wmv
 
 .env
+.eslintrc.json
+
 
 

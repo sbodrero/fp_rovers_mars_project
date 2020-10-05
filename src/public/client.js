@@ -5,13 +5,13 @@
 let store = Immutable.Map({
     all_rovers: {},
     rovers: Immutable.List(['Curiosity', 'Opportunity', 'Spirit']),
-})
+});
 
 /**
  * Select root Elemenent as Root
  * @type {HTMLElement}ƒ
  */
-const root = document.getElementById('root')
+const root = document.getElementById('root');
 
 /**
  * Update store content on update
@@ -66,7 +66,7 @@ const showLoader = () =>`
             alt="Loading"
         />
     </div>
-`
+`;
 
 /**
  * Create rover info list wrapper
@@ -79,11 +79,12 @@ const createWrapperInfoList = (callback) => `
             ${callback()}
         </ld>
     </div>
-`
+`;
 
 /**
  * Create rover info list content
  * @param rover
+ * @param all_rovers
  * @returns {function(): string}
  */
 const createRoverInfoList = (all_rovers, rover) => () => {
@@ -99,7 +100,7 @@ const createRoverInfoList = (all_rovers, rover) => () => {
             <dd>${status}</dd>
             <dt>Date the most recent photos were taken</dt>
             <dd>${earth_date}</dd>
-    `
+    `;
 }
 
 /**
@@ -120,7 +121,7 @@ const createRoverTabContent = (all_rovers, rovers) => {
             ${createWrapperGallery(createRoverGallery(all_rovers, rover))}
         </div>
        `
-    ).join('')
+    ).join('');
 }
 
 /**
@@ -134,7 +135,7 @@ const createWrapperGallery = (callback) => `
     <div class="galleryGrid">
         ${callback()}
     </div>
-`
+`;
 
 /**
  * Create a div wrapper for item gallery elements
@@ -145,7 +146,7 @@ const createItemWrapperGallery = (callback) => `
     <div>
         ${callback()}
     </div>
-`
+`;
 
 /**
  * Create a gallery item
@@ -158,7 +159,7 @@ const createRoverGallery =  (all_rovers, rover) => () => {
     return latest_photos.map(photo => `
             ${createItemWrapperGallery(galleryItem(photo.img_src, photo.earth_date))}
         `
-    ).join('')
+    ).join('');
 }
 
 /**
@@ -172,7 +173,8 @@ const galleryItem = (src, date) => () => `
         <img src="${src}"/>       
         <p>${date}</p>
     </div>
-`
+`;
+
 /**
  * Create Welcome title
  * @returns {string}
@@ -180,7 +182,8 @@ const galleryItem = (src, date) => () => `
  */
 const WelcomeTitle = () => `
     <h1>Welcome to mars rovers informations panel</h1>
-    `
+    `;
+
 /**
  * Create tablinks wrapper html element
  * @param callback
@@ -190,7 +193,8 @@ const createTablinksWrapper = (callback) =>`
     <div class="tab"> 
         ${callback()}
     </div>
-`
+`;
+
 /**
  * Create TabLinks
  * @param rovers
@@ -205,7 +209,7 @@ const createTabLinks = (rovers) => () => {
     ${rover}
     </button>
     `
-    ).join('')
+    ).join('');
 }
 
 /**
@@ -221,7 +225,7 @@ const renderContentOrLoader = (all_rovers, rovers) => {
     return `
     ${createTablinksWrapper(createTabLinks(rovers))}
     ${createRoverTabContent(all_rovers, rovers)}
-    `
+    `;
 }
 
 /**
@@ -242,7 +246,7 @@ const App = (state) => {
                 ${renderContentOrLoader(all_rovers, rovers)}
             </section>
         </main>
-    `
+    `;
 }
 
 /**
@@ -250,7 +254,7 @@ const App = (state) => {
  * @param roverList
  * @param callback
  */
-const loadRoversData = (roverList, callback) => roverList.forEach(rover => callback(rover.toLowerCase()))
+const loadRoversData = (roverList, callback) => roverList.forEach(rover => callback(rover.toLowerCase()));
 
 /**
  * Load latest image by rover name and update store
@@ -264,6 +268,9 @@ const getLatestImagsByRoverName = (roverName) => {
             const all_rovers = store.get('all_rovers', {});
             updateStore(store, {all_rovers: Object.assign(all_rovers, { [roverName]: {...rover}})})
         })
+        .catch((e) => {
+            console.log(e.toString())
+        });
 }
 
 /**
@@ -285,7 +292,7 @@ const openRoverTab = (evt, roverName) => {
 
     tabContent = document.getElementsByClassName("tabContent");
     for (i = 0; i < tabContent.length; i++) {
-        tabContent[i].style.display = "none"
+        tabContent[i].style.display = "none";
     }
 
     tabLinks = document.getElementsByClassName("tabLinks");
