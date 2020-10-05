@@ -20,7 +20,6 @@ const root = document.getElementById('root')
  */
 const updateStore = (store, newState) => {
     store = store.merge(newState);
-    console.log(store.toJS(), 'store');
     render(root, store);
 }
 
