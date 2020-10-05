@@ -9,7 +9,7 @@ let store = Immutable.Map({
 
 /**
  * Select root Elemenent as Root
- * @type {HTMLElement}
+ * @type {HTMLElement}ƒ
  */
 const root = document.getElementById('root')
 
@@ -46,10 +46,10 @@ const setActiveTabOnLoad = (rover) => rover === 'Curiosity' ? 'style="display: b
  * @returns {string}
  */
 const showLoader = () =>`
-    <div>
+    <div class="loader">
         <p>Loading...</p>
         <img
-            src="./assets/images/giphy.webp"
+            src="./assets/images/giphy.gif"
             alt="Loading"
         />
     </div>
@@ -89,26 +89,77 @@ const createRoverInfoList = (all_rovers, rover) => () => {
     `
 }
 
-const hasNoData = (all_rovers, rover) => !all_rovers || (all_rovers && !all_rovers[rover.toLowerCase()]);
-
 /**
- * Return a rover info list or a loader
- * @param rover
+ * Create roves tabContents
+ * @param all_rovers
+ * @param rovers
  * @returns {string}
  */
-const getRoverInfoTableOrLoader = (all_rovers, rover) => {
-    if(hasNoData(all_rovers, rover)) {
-        return showLoader();
-    }
-    return createWrapperInfoList(createRoverInfoList(all_rovers, rover));
+const createRoverTabContent = (all_rovers, rovers) => {
+    return rovers.map(rover =>
+        `<div 
+            id="${rover.toLowerCase()}" 
+            class="tabContent"
+            ${setActiveTabOnLoad(rover)}
+            >
+            ${createTabWelcomeTitle(createRoverHeader(rover))}
+            ${createWrapperInfoList(createRoverInfoList(all_rovers, rover))}
+            ${createWrapperGallery(createRoverGallery(all_rovers, rover))}
+        </div>
+       `
+    ).join('')
 }
 
-const getRoverGalleryOrLoader = (all_rovers, rover) => {
-    if(hasNoData(all_rovers, rover)) {
-        return showLoader();
-    }
-    return;
+/**
+ * Create a div wrapper for gallery elements
+ * @param callback
+ * @returns {string}
+ */
+const createWrapperGallery = (callback) => `
+    <hr>
+    <h2>Latest photos</h2>
+    <div class="galleryGrid">
+        ${callback()}
+    </div>
+`
+
+/**
+ * Create a div wrapper for item gallery elements
+ * @param callback
+ * @returns {string}
+ */
+const createItemWrapperGallery = (callback) => `
+    <div>
+        ${callback()}
+    </div>
+`
+
+/**
+ * Create a gallery item
+ * @param all_rovers
+ * @param rover
+ * @returns {function(): *}
+ */
+const createRoverGallery =  (all_rovers, rover) => () => {
+    const { latest_photos } = all_rovers[rover.toLowerCase()];
+    return latest_photos.map(photo => `
+            ${createItemWrapperGallery(galleryItem(photo.img_src, photo.earth_date))}
+        `
+    ).join('')
 }
+
+/**
+ * Return a gallery item content
+ * @param src
+ * @param date
+ * @returns {function(): string}
+ */
+const galleryItem = (src, date) => () => `
+    <div>
+        <img src="${src}"/>       
+        <p>${date}</p>
+    </div>
+`
 
 /**
  * Main dynamic content
@@ -118,36 +169,14 @@ const getRoverGalleryOrLoader = (all_rovers, rover) => {
  */
 const App = (state) => {
     const { rovers, all_rovers } = state.toJS();
-    console.log(Object.keys(all_rovers).length, 'all_rovers.length')
     return `
-        <header></header>
-        <main>
+        <header>
             ${WelcomeTitle()}
+        </header>
+        <main>
             <section>
-                <h2>Welcome to mars rovers informations</h2>
-                <div class="tab">                   
-                   ${rovers.map(rover =>`
-                        <button 
-                        class="tablinks" 
-                        onclick="openRoverTab(event,'${rover.toLowerCase()}')"
-                        >
-                            ${rover}
-                        </button>
-                   `).join('')}
-                </div>
-                ${Object.keys(all_rovers).length === 3 && rovers.map(rover => 
-                    `<div 
-                        id="${rover.toLowerCase()}" 
-                        class="tabcontent"
-                        ${setActiveTabOnLoad(rover)}
-                        >
-                        ${createTabWelcomeTitle(createRoverHeader(rover))}
-                        <div class="homeGrid">
-                            ${getRoverInfoTableOrLoader(all_rovers, rover)}
-                        </div>
-                    </div>
-                   `
-                ).join('')}
+                <h2>Please chose a rover</h2>
+                ${renderContentOrLoader(all_rovers, rovers)}
             </section>
         </main>
         <footer></footer>
@@ -155,13 +184,55 @@ const App = (state) => {
 }
 
 /**
- *
+ * Create Welcome title
  * @returns {string}
  * @constructor
  */
 const WelcomeTitle = () => `
-            <h1>Welcome to mars rovers informations panel</h1>
-        `
+    <h1>Welcome to mars rovers informations panel</h1>
+    `
+/**
+ * Create tablinks wrapper html element
+ * @param callback
+ * @returns {string}
+ */
+const createTablinksWrapper = (callback) =>`
+    <div class="tab"> 
+        ${callback()}
+    </div>
+`
+/**
+ * Create TabLinks
+ * @param rovers
+ * @returns function
+*/
+const createTabLinks = (rovers) => () => {
+    return rovers.map(rover =>`
+    <button 
+     class="tabLinks" 
+     onclick="openRoverTab(event,'${rover.toLowerCase()}')"
+    >
+    ${rover}
+    </button>
+    `
+    ).join('')
+}
+
+/**
+ * Render the content or a loader
+ * @param all_rovers
+ * @param rovers
+ * @returns {string}
+ */
+const renderContentOrLoader = (all_rovers, rovers) => {
+    if (Object.keys(all_rovers).length < 3) {
+        return showLoader()
+    }
+    return `
+    ${createTablinksWrapper(createTabLinks(rovers))}
+    ${createRoverTabContent(all_rovers, rovers)}
+    `
+}
 
 /**
  * Return rover's Name
@@ -175,7 +246,7 @@ const createRoverHeader = (roverName) => () => `${roverName}`;
  * @param callback
  * @returns {string}
  */
-const createTabWelcomeTitle = (callback) => `<h3>Welcome to ${callback()} tab</h3>`;
+const createTabWelcomeTitle = (callback) => `<h3>Here are ${callback()} informations</h3><hr/>`;
 
 /**
  * Load rovers date from api
@@ -204,7 +275,7 @@ const getLatestImagsByRoverName = (roverName) => {
 window.addEventListener('load', () => {
     const rovers = store.get('rovers', []).toJS();
     loadRoversData(rovers, getLatestImagsByRoverName);
-    render(root, store)
+    render(root, store);
 })
 
 /**
@@ -215,12 +286,12 @@ window.addEventListener('load', () => {
 const openRoverTab = (evt, roverName) => {
     let i, tabContent, tabLinks;
 
-    tabContent = document.getElementsByClassName("tabcontent");
+    tabContent = document.getElementsByClassName("tabContent");
     for (i = 0; i < tabContent.length; i++) {
-        tabContent[i].style.display = "none";
+        tabContent[i].style.display = "none"
     }
 
-    tabLinks = document.getElementsByClassName("tablinks");
+    tabLinks = document.getElementsByClassName("tabLinks");
     for (i = 0; i < tabLinks.length; i++) {
         tabLinks[i].className = tabLinks[i].className.replace(" active", "");
     }
